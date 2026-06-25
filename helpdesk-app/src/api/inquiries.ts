@@ -1,5 +1,5 @@
 import { api } from '../lib/api'
-import type { Inquiry, InquiryCreateInput, InquiryStatus } from '../types/inquiry'
+import type { Inquiry, InquiryCreateInput, InquiryStatus,UpdateInquiryInput } from '../types/inquiry'
 
 // API 呼び出しを 1 ファイルに集約する。baseURL はオリジンなので /api を付ける。
 export const inquiryApi = {
@@ -18,6 +18,12 @@ export const inquiryApi = {
   // ステータス更新は PUT
   updateStatus: async (id: number, status: InquiryStatus): Promise<Inquiry> => {
     const response = await api.put<Inquiry>(`/api/inquiries/${id}`, { status })
+    return response.data
+  },
+
+  //内容更新
+  update:async (id:number,input:UpdateInquiryInput):Promise<Inquiry> =>{
+    const response = await api.put<Inquiry>(`/api/inquiries/${id}`,input)
     return response.data
   },
 

@@ -28,3 +28,10 @@ export type InquiryCreateInput = {
 export type InquiryStatusUpdateInput = {
   status: InquiryStatus
 }
+
+//内容更新データ
+export type UpdateInquiryInput = {
+  title?:string,
+  content?:string,
+  status?:InquiryStatus
+}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Inquiry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class InquiryController extends Controller
 {
@@ -40,6 +41,8 @@ class InquiryController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:pending,in_progress,completed',
+            'title' => 'sometimes | string | max:100',
+            'content' => 'sometimes | string | max:1000'
         ]);
 
         $inquiry->update($validated);
@@ -50,6 +53,8 @@ class InquiryController extends Controller
     // 削除
     public function destroy(Inquiry $inquiry)
     {
+        Gate::authorize('admin');  // 管理者でなければ 403 を返す
+
         $inquiry->delete();
 
         return response()->json(null, 204);
