@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  Box,
   Button,
   TextField,
   MenuItem,
@@ -13,7 +12,6 @@ import { inquiryApi } from "../api/inquiries";
 import type {
   Inquiry,
   InquiryStatus,
-  UpdateInquiryInput,
 } from "../types/inquiry";
 
 type InquiryEditPageProps = {

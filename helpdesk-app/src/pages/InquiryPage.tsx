@@ -1,15 +1,5 @@
 import { useState } from "react";
 import axios from "axios";
-import {
-  Box,
-  Typography,
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Button,
-  Snackbar,
-  Alert,
-} from "@mui/material";
 import type { User } from "../types/auth";
 import { useInquiries } from "../hooks/useInquiries";
 import type { Inquiry, InquiryStatus } from "../types/inquiry";
@@ -18,7 +8,8 @@ import { InquiryCreatePage } from "./InquiryCreatePage";
 import { InquiryDetailPage } from "./InquiryDetailPage";
 import { InquiryListPage } from "./InquiryListPage";
 import { InquiryEditPage } from "./InquiryEditPage";
-type Page = "list" | "detail" | "create" | "edit";
+import { InquiryHeader } from "../components/InquiryHeader";
+import type { Page } from "../types/page";
 
 type InquiryPageProps = {
   user: User;
@@ -79,34 +70,11 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
 
   return (
     <div>
-      <header>
-        <Box
-          sx={{
-            maxWidth: 800,
-            mx: "auto", // margin: auto (左右中央)
-            mt: 4, // margin-top: 32px (4 * 8px)
-            px: 2, // padding-left/right: 16px
-            bgcolor: "grey.50",
-            borderRadius: 2,
-          }}
-        >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", color: "text.primary" }}
-            gutterBottom
-          >
-            問い合わせ一覧
-          </Typography>
-          {/* テーブルがここに入ります */}
-        </Box>
-        <span>{user.name}</span>
-        <button onClick={onLogout}>ログアウト</button>
-        <nav>
-          <button onClick={() => setCurrentPage("list")}>一覧</button>
-          <button onClick={() => setCurrentPage("create")}>新規登録</button>
-        </nav>
-      </header>
-
+      <InquiryHeader
+        user={user}
+        onLogout={onLogout}
+        onNavigate={setCurrentPage}
+      />
       <main>
         {currentPage === "list" && (
           <InquiryListPage
@@ -124,9 +92,7 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
             onBack={handleBack}
             onUpdateStatus={handleUpdateStatus}
             onDelete={handleDelete}
-            onEdit={() => {
-              setCurrentPage("edit");
-            }}
+            onEdit={handleEditInquiry}
           />
         )}
         {currentPage === "create" && (

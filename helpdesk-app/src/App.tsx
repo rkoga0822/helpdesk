@@ -4,7 +4,6 @@ import { useAuth } from "./hooks/useAuth";
 import { RegisterForm } from "./components/RegisterForm";
 import { InquiryPage } from "./pages/InquiryPage";
 
-
 function App() {
   const { user, isLoggedIn, isLoading, login, logout, register } = useAuth();
 
