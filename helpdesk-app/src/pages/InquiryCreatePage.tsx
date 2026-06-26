@@ -1,6 +1,4 @@
 import { useForm } from "react-hook-form";
-import axios from "axios";
-import { inquiryApi } from "../api/inquiries";
 import type { Inquiry, InquiryCreateInput } from "../types/inquiry";
 import {
   Box,
@@ -11,6 +9,8 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useCreateInquiry } from "../hooks/useCreateInquiry";
+import axios from "axios";
 
 type LaravelValidationError = {
   message: string;
@@ -18,7 +18,7 @@ type LaravelValidationError = {
 };
 
 type InquiryCreatePageProps = {
-  onCreated: (inquiry: Inquiry) => void;
+  onCreated: (data: InquiryCreateInput) => void;
   onBack: () => void;
 };
 
@@ -34,23 +34,28 @@ export function InquiryCreatePage({
     formState: { errors, isSubmitting },
   } = useForm<InquiryCreateInput>();
 
-  const onSubmit = async (data: InquiryCreateInput) => {
-    try {
-      const inquiry = await inquiryApi.create(data);
-      onCreated(inquiry);
-    } catch (e) {
-      if (axios.isAxiosError(e) && e.response?.status === 422) {
-        // Laravel の 422 バリデーションエラーを各フィールドに紐付ける
-        const body = e.response.data as LaravelValidationError;
-        Object.entries(body.errors).forEach(([field, messages]) => {
-          setError(field as keyof InquiryCreateInput, {
-            type: "server",
-            message: messages[0],
+  const onSubmit = (data: InquiryCreateInput) => {
+    createInquiry(data, {
+      onSuccess: () => {
+        onCreated(data);
+      },
+
+      onError: (e) => {
+        if (axios.isAxiosError(e) && e.response?.status === 422) {
+          const body = e.response.data as LaravelValidationError;
+
+          Object.entries(body.errors).forEach(([field, messages]) => {
+            setError(field as keyof InquiryCreateInput, {
+              type: "server",
+              message: messages[0],
+            });
           });
-        });
-      }
-    }
+        }
+      },
+    });
   };
+
+  const { mutate: createInquiry } = useCreateInquiry();
 
   return (
     <Box

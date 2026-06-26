@@ -10,7 +10,7 @@ import { InquiryListPage } from "./InquiryListPage";
 import { InquiryEditPage } from "./InquiryEditPage";
 import { InquiryHeader } from "../components/InquiryHeader";
 import type { Page } from "../types/page";
-
+import { useCreateInquiry } from "../hooks/useCreateInquiry";
 type InquiryPageProps = {
   user: User;
   onLogout: () => void;
@@ -23,10 +23,19 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
     setFilter,
     isLoading,
     error,
-    addInquiry,
     updateInquiry,
     removeInquiry,
   } = useInquiries();
+
+  const { mutate: createInquiry } = useCreateInquiry({
+    onSuccess: () => {
+      setCurrentPage("list");
+    },
+  });
+
+  const handleCreated = () => {
+    setCurrentPage("list");
+  };
 
   const [currentPage, setCurrentPage] = useState<Page>("list");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -37,10 +46,6 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
   };
   const handleBack = () => {
     setSelectedId(null);
-    setCurrentPage("list");
-  };
-  const handleCreated = (inquiry: Inquiry) => {
-    addInquiry(inquiry);
     setCurrentPage("list");
   };
 
@@ -96,7 +101,7 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
           />
         )}
         {currentPage === "create" && (
-          <InquiryCreatePage onCreated={handleCreated} onBack={handleBack} />
+          <InquiryCreatePage onCreated={createInquiry} onBack={handleBack} />
         )}
 
         {currentPage === "edit" && selectedInquiry && (
