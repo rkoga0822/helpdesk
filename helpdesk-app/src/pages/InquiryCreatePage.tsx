@@ -56,7 +56,6 @@ export function InquiryCreatePage({
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "grey.100",
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",

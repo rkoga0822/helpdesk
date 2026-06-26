@@ -20,7 +20,7 @@ type InquiryDetailPageProps = {
   onBack: () => void;
   onUpdateStatus: (id: number, status: InquiryStatus) => void;
   onDelete: (id: number) => void;
-  onEdit:()=>void;
+  onEdit: () => void;
 };
 
 // 詳細ページ。表示とユーザー操作の通知だけを担当し、API 呼び出しは App 側に置く
@@ -58,35 +58,18 @@ export function InquiryDetailPage({
               whiteSpace: "pre-wrap",
             }}
           >
-            {inquiry.content}
+            内容：{inquiry.content}
           </Typography>
 
           <Typography variant="body2" color="text.secondary">
             投稿日時：{inquiry.created_at}
           </Typography>
 
-          <FormControl fullWidth>
-            <InputLabel>ステータス</InputLabel>
-
-            <Select
-              label="ステータス"
-              value={inquiry.status}
-              onChange={(e) =>
-                onUpdateStatus(inquiry.id, e.target.value as InquiryStatus)
-              }
-            >
-              <MenuItem value="pending">未対応</MenuItem>
-
-              <MenuItem value="in_progress">対応中</MenuItem>
-
-              <MenuItem value="completed">完了</MenuItem>
-            </Select>
-          </FormControl>
-
           <Box
             sx={{
               display: "flex",
               justifyContent: "flex-end",
+              gap: 2,
             }}
           >
             <Button
@@ -98,10 +81,9 @@ export function InquiryDetailPage({
               削除
             </Button>
 
-           
             <Button variant="contained" onClick={onEdit}>
-            編集
-          </Button>
+              編集
+            </Button>
           </Box>
         </Stack>
       </Paper>
