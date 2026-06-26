@@ -1,6 +1,5 @@
 import { useState } from "react";
 import axios from "axios";
-import { RegisterForm } from "./components/RegisterForm";
 import {
   Box,
   Typography,
@@ -11,10 +10,14 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import { InquiryEditPage } from "./pages/InquiryEditPage";
 import type { User } from "../types/auth";
 import { useInquiries } from "../hooks/useInquiries";
-import type { Inquiry } from "../types/inquiry";
+import type { Inquiry, InquiryStatus } from "../types/inquiry";
+import { inquiryApi } from "../api/inquiries";
+import { InquiryCreatePage } from "./InquiryCreatePage";
+import { InquiryDetailPage } from "./InquiryDetailPage";
+import { InquiryListPage } from "./InquiryListPage";
+import { InquiryEditPage } from "./InquiryEditPage";
 type Page = "list" | "detail" | "create" | "edit";
 
 type InquiryPageProps = {
@@ -22,7 +25,7 @@ type InquiryPageProps = {
   onLogout: () => void;
 };
 
-export InquiryPage({ user, onLogout }: InquiryPageProps) {
+export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
   const {
     inquiries,
     filter,
@@ -143,4 +146,4 @@ export InquiryPage({ user, onLogout }: InquiryPageProps) {
       </main>
     </div>
   );
-}
+};
