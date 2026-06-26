@@ -1,5 +1,12 @@
 import { useForm } from "react-hook-form";
 import type { RegisterInput } from "../types/auth";
+import {
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 type RegisterFormProps = {
   onRegister: (input: RegisterInput) => Promise<unknown>;
@@ -23,65 +30,108 @@ export function RegisterForm({
   };
 
   return (
+  <Paper
+    elevation={2}
+    sx={{
+      p: 4,
+      width: "100%",
+      maxWidth: 400,
+    }}
+  >
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 700,
+        mb: 3,
+      }}
+    >
+      アカウント作成
+    </Typography>
+
+
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h2>アカウント作成</h2>
-      <div>
-        <label>メールアドレス</label>
-        <input
+      <Stack spacing={3}>
+
+        <TextField
+          label="メールアドレス"
           type="email"
+          fullWidth
+          error={!!errors.email}
+          helperText={errors.email?.message}
           {...register("email", {
-            required: "メールアドレスを入力してください",
+            required:
+              "メールアドレスを入力してください",
           })}
         />
-        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
-      </div>
 
-      <div>
-        <label>名前</label>
-        <input
-          type="name"
+
+        <TextField
+          label="名前"
+          fullWidth
+          error={!!errors.name}
+          helperText={errors.name?.message}
           {...register("name", {
-            required: "名前を入力してください",
+            required:
+              "名前を入力してください",
           })}
         />
-        {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
-      </div>
 
-      <div>
-        <label htmlFor="password">パスワード</label>
-        <input
+
+        <TextField
+          label="パスワード"
           type="password"
-          id="password"
+          fullWidth
+          error={!!errors.password}
+          helperText={errors.password?.message}
           {...register("password", {
-            required: "パスワードを入力してください",
+            required:
+              "パスワードを入力してください",
           })}
         />
-        {errors.password && (
-          <p style={{ color: "red" }}>{errors.password.message}</p>
-        )}
-      </div>
 
-      <div>
-        <label>パスワード確認</label>
-        <input
+
+        <TextField
+          label="パスワード確認"
           type="password"
+          fullWidth
+          error={!!errors.password_confirmation}
+          helperText={
+            errors.password_confirmation?.message
+          }
           {...register("password_confirmation", {
-            required: "確認用パスワードを入力してください",
+            required:
+              "確認用パスワードを入力してください",
+
             validate: (value) =>
-              value === password || "パスワードが一致しません",
+              value === password ||
+              "パスワードが一致しません",
           })}
         />
-        {errors.password_confirmation && (
-          <p style={{ color: "red" }}>{errors.password_confirmation.message}</p>
-        )}
-      </div>
-      {/* password_confirmation は watch('password') と一致チェック */}
-      <button type="submit" disabled={isSubmitting}>
-        登録する
-      </button>
-      <button type="button" onClick={onSwitchToLogin}>
-        ログインに戻る
-      </button>
+
+
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? "登録中..."
+            : "登録する"}
+        </Button>
+
+
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={onSwitchToLogin}
+        >
+          ログインに戻る
+        </Button>
+
+      </Stack>
     </form>
-  );
+
+  </Paper>
+);
 }

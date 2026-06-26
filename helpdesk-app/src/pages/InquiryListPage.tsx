@@ -22,7 +22,7 @@ export function InquiryListPage({
 }: InquiryListPageProps) {
   return (
     <div>
-      <h2>問い合わせ一覧（{inquiries.length} 件）</h2>
+      <h2 className="text-lg font-bold text-gray-800 mb-4">問い合わせ一覧（{inquiries.length} 件）</h2>
 
       <StatusFilter
         current={filter}
@@ -30,11 +30,11 @@ export function InquiryListPage({
         counts={{ all: inquiries.length }}
       />
 
-      {isLoading && <p>読み込み中...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {isLoading && <p className="text-sm text-gray-500">読み込み中...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
       {!isLoading && !error &&
         (inquiries.length === 0 ? (
-          <p>該当する問い合わせはありません。</p>
+          <p className="text-sm text-gray-500">該当する問い合わせはありません。</p>
         ) : (
           <InquiryTable inquiries={inquiries} onSelect={onSelectInquiry} />
         ))}

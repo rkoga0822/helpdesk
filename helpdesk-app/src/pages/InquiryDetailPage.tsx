@@ -1,12 +1,27 @@
-import type { Inquiry, InquiryStatus } from '../types/inquiry'
-import { StatusBadge } from '../components/StatusBadge'
+import type { Inquiry, InquiryStatus } from "../types/inquiry";
+import { StatusBadge } from "../components/StatusBadge";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 type InquiryDetailPageProps = {
-  inquiry: Inquiry
-  onBack: () => void
-  onUpdateStatus: (id: number, status: InquiryStatus) => void
-  onDelete: (id: number) => void
-}
+  inquiry: Inquiry;
+  onBack: () => void;
+  onUpdateStatus: (id: number, status: InquiryStatus) => void;
+  onDelete: (id: number) => void;
+  onEdit:()=>void;
+};
 
 // 詳細ページ。表示とユーザー操作の通知だけを担当し、API 呼び出しは App 側に置く
 export function InquiryDetailPage({
@@ -14,30 +29,82 @@ export function InquiryDetailPage({
   onBack,
   onUpdateStatus,
   onDelete,
+  onEdit,
 }: InquiryDetailPageProps) {
   return (
-    <div>
-      <button onClick={onBack}>← 一覧へ戻る</button>
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Paper elevation={2} sx={{ p: 4 }}>
+        <Stack spacing={3}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={onBack}
+            sx={{ alignSelf: "flex-start" }}
+          >
+            一覧へ戻る
+          </Button>
 
-      <h2>{inquiry.title}</h2>
-      <StatusBadge status={inquiry.status} />
-      <p>投稿者：{inquiry.requester}</p>
-      <p>{inquiry.content}</p>
-      <p>日時：{inquiry.created_at}</p>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+            {inquiry.title}
+          </Typography>
 
-      <div>
-        <label>ステータス変更：</label>
-        <select
-          value={inquiry.status}
-          onChange={(e) => onUpdateStatus(inquiry.id, e.target.value as InquiryStatus)}
-        >
-          <option value="pending">未対応</option>
-          <option value="in_progress">対応中</option>
-          <option value="completed">完了</option>
-        </select>
-      </div>
+          <StatusBadge status={inquiry.status} />
 
-      <button onClick={() => onDelete(inquiry.id)}>削除</button>
-    </div>
-  )
+          <Typography color="text.secondary">
+            投稿者：{inquiry.requester}
+          </Typography>
+
+          <Typography
+            sx={{
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {inquiry.content}
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary">
+            投稿日時：{inquiry.created_at}
+          </Typography>
+
+          <FormControl fullWidth>
+            <InputLabel>ステータス</InputLabel>
+
+            <Select
+              label="ステータス"
+              value={inquiry.status}
+              onChange={(e) =>
+                onUpdateStatus(inquiry.id, e.target.value as InquiryStatus)
+              }
+            >
+              <MenuItem value="pending">未対応</MenuItem>
+
+              <MenuItem value="in_progress">対応中</MenuItem>
+
+              <MenuItem value="completed">完了</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => onDelete(inquiry.id)}
+            >
+              削除
+            </Button>
+
+           
+            <Button variant="contained" onClick={onEdit}>
+            編集
+          </Button>
+          </Box>
+        </Stack>
+      </Paper>
+    </Container>
+  );
 }

@@ -1,89 +1,148 @@
-import { useForm } from 'react-hook-form'
-import axios from 'axios'
-import { inquiryApi } from '../api/inquiries'
-import type { Inquiry, InquiryCreateInput } from '../types/inquiry'
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import { inquiryApi } from "../api/inquiries";
+import type { Inquiry, InquiryCreateInput } from "../types/inquiry";
+import {
+  Box,
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 type LaravelValidationError = {
-  message: string
-  errors: Record<string, string[]>
-}
+  message: string;
+  errors: Record<string, string[]>;
+};
 
 type InquiryCreatePageProps = {
-  onCreated: (inquiry: Inquiry) => void
-  onBack: () => void
-}
+  onCreated: (inquiry: Inquiry) => void;
+  onBack: () => void;
+};
 
 // 新規登録フォーム。React Hook Form で入力を管理し、POST /api/inquiries で作成する
-export function InquiryCreatePage({ onCreated, onBack }: InquiryCreatePageProps) {
+export function InquiryCreatePage({
+  onCreated,
+  onBack,
+}: InquiryCreatePageProps) {
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<InquiryCreateInput>()
+  } = useForm<InquiryCreateInput>();
 
   const onSubmit = async (data: InquiryCreateInput) => {
     try {
-      const inquiry = await inquiryApi.create(data)
-      onCreated(inquiry)
+      const inquiry = await inquiryApi.create(data);
+      onCreated(inquiry);
     } catch (e) {
       if (axios.isAxiosError(e) && e.response?.status === 422) {
         // Laravel の 422 バリデーションエラーを各フィールドに紐付ける
-        const body = e.response.data as LaravelValidationError
+        const body = e.response.data as LaravelValidationError;
         Object.entries(body.errors).forEach(([field, messages]) => {
           setError(field as keyof InquiryCreateInput, {
-            type: 'server',
+            type: "server",
             message: messages[0],
-          })
-        })
+          });
+        });
       }
     }
-  }
+  };
 
   return (
-    <div>
-      <button onClick={onBack}>← 一覧へ戻る</button>
-      <h2>新規問い合わせ</h2>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "grey.100",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        pt: 8,
+      }}
+    >
+      <Paper
+        elevation={2}
+        sx={{
+          p: 4,
+          width: "100%",
+          maxWidth: 600,
+          borderRadius: 2,
+        }}
+      >
+        <Button startIcon={<ArrowBackIcon />} onClick={onBack} sx={{ mb: 2 }}>
+          一覧へ戻る
+        </Button>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label>タイトル</label>
-          <input
-            {...register('title', {
-              required: 'タイトルを入力してください',
-              maxLength: { value: 100, message: '100文字以内で入力してください' },
-            })}
-          />
-          {errors.title && <p style={{ color: 'red' }}>{errors.title.message}</p>}
-        </div>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }} gutterBottom>
+          新規問い合わせ
+        </Typography>
 
-        <div>
-          <label>内容</label>
-          <textarea
-            rows={4}
-            {...register('content', {
-              required: '内容を入力してください',
-              maxLength: { value: 1000, message: '1000文字以内で入力してください' },
-            })}
-          />
-          {errors.content && <p style={{ color: 'red' }}>{errors.content.message}</p>}
-        </div>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <TextField
+              label="タイトル"
+              required
+              fullWidth
+              placeholder="例：ログインできない"
+              error={!!errors.title}
+              helperText={errors.title?.message}
+              {...register("title", {
+                required: "タイトルを入力してください",
+                maxLength: {
+                  value: 100,
+                  message: "100文字以内で入力してください",
+                },
+              })}
+            />
 
-        <div>
-          <label>投稿者名</label>
-          <input
-            {...register('requester', {
-              required: '投稿者名を入力してください',
-              maxLength: { value: 100, message: '100文字以内で入力してください' },
-            })}
-          />
-          {errors.requester && <p style={{ color: 'red' }}>{errors.requester.message}</p>}
-        </div>
+            <TextField
+              label="内容"
+              required
+              fullWidth
+              multiline
+              rows={4}
+              placeholder="問題の詳細を入力してください"
+              error={!!errors.content}
+              helperText={errors.content?.message}
+              {...register("content", {
+                required: "内容を入力してください",
+                maxLength: {
+                  value: 1000,
+                  message: "1000文字以内で入力してください",
+                },
+              })}
+            />
 
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? '送信中...' : '登録する'}
-        </button>
-      </form>
-    </div>
-  )
+            <TextField
+              label="投稿者名"
+              required
+              fullWidth
+              placeholder="例：山田太郎"
+              error={!!errors.requester}
+              helperText={errors.requester?.message}
+              {...register("requester", {
+                required: "投稿者名を入力してください",
+                maxLength: {
+                  value: 100,
+                  message: "100文字以内で入力してください",
+                },
+              })}
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "送信中..." : "登録する"}
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+    </Box>
+  );
 }

@@ -1,6 +1,13 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import type { LoginInput, User } from "../types/auth";
+import {
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 type LaravelValidationError = {
   errors: Record<string, string[]>;
@@ -36,42 +43,72 @@ export function LoginForm({ onLogin, onSwitchToRegister }: LoginFormProps) {
   };
 
   return (
+  <Paper
+    elevation={2}
+    sx={{
+      p: 4,
+      width: "100%",
+      maxWidth: 400,
+    }}
+  >
+    <Typography
+      variant="h5"
+      sx={{ fontWeight: 700, mb: 3 }}
+    >
+      ログイン
+    </Typography>
+
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h2>ログイン</h2>
+      <Stack spacing={3}>
 
-      <div>
-        <label htmlFor="email">メールアドレス</label>
-        <input
+        <TextField
+          label="メールアドレス"
           type="email"
-          id="email"
+          fullWidth
+          error={!!errors.email}
+          helperText={errors.email?.message}
           {...register("email", {
-            required: "メールアドレスを入力してください",
+            required:
+              "メールアドレスを入力してください",
           })}
         />
-        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
-      </div>
 
-      <div>
-        <label htmlFor="password">パスワード</label>
-        <input
+
+        <TextField
+          label="パスワード"
           type="password"
-          id="password"
+          fullWidth
+          error={!!errors.password}
+          helperText={errors.password?.message}
           {...register("password", {
-            required: "パスワードを入力してください",
+            required:
+              "パスワードを入力してください",
           })}
         />
-        {errors.password && (
-          <p style={{ color: "red" }}>{errors.password.message}</p>
-        )}
-      </div>
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "ログイン中..." : "ログイン"}
-      </button>
 
-      <button type="button" onClick={onSwitchToRegister}>
-        新規登録
-      </button>
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? "ログイン中..."
+            : "ログイン"}
+        </Button>
+
+
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={onSwitchToRegister}
+        >
+          新規登録
+        </Button>
+
+      </Stack>
     </form>
-  );
+  </Paper>
+);
 }

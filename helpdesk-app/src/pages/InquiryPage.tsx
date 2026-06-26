@@ -1,24 +1,28 @@
 import { useState } from "react";
-import { LoginForm } from "./components/LoginForm";
-import { InquiryListPage } from "./pages/InquiryListPage";
-import { InquiryDetailPage } from "./pages/InquiryDetailPage";
-import { InquiryCreatePage } from "./pages/InquiryCreatePage";
-import { useAuth } from "./hooks/useAuth";
-import { useInquiries } from "./hooks/useInquiries";
-import { inquiryApi } from "./api/inquiries";
-import type { User } from "./types/auth";
-import type { Inquiry, InquiryStatus } from "./types/inquiry";
 import axios from "axios";
 import { RegisterForm } from "./components/RegisterForm";
+import {
+  Box,
+  Typography,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import { InquiryEditPage } from "./pages/InquiryEditPage";
-
+import type { User } from "../types/auth";
+import { useInquiries } from "../hooks/useInquiries";
+import type { Inquiry } from "../types/inquiry";
 type Page = "list" | "detail" | "create" | "edit";
+
 type InquiryPageProps = {
   user: User;
   onLogout: () => void;
 };
 
-function InquiryPage({ user, onLogout }: InquiryPageProps) {
+export InquiryPage({ user, onLogout }: InquiryPageProps) {
   const {
     inquiries,
     filter,
@@ -73,7 +77,25 @@ function InquiryPage({ user, onLogout }: InquiryPageProps) {
   return (
     <div>
       <header>
-        <h1>問い合わせ管理</h1>
+        <Box
+          sx={{
+            maxWidth: 800,
+            mx: "auto", // margin: auto (左右中央)
+            mt: 4, // margin-top: 32px (4 * 8px)
+            px: 2, // padding-left/right: 16px
+            bgcolor: "grey.50",
+            borderRadius: 2,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: "bold", color: "text.primary" }}
+            gutterBottom
+          >
+            問い合わせ一覧
+          </Typography>
+          {/* テーブルがここに入ります */}
+        </Box>
         <span>{user.name}</span>
         <button onClick={onLogout}>ログアウト</button>
         <nav>
@@ -81,6 +103,7 @@ function InquiryPage({ user, onLogout }: InquiryPageProps) {
           <button onClick={() => setCurrentPage("create")}>新規登録</button>
         </nav>
       </header>
+
       <main>
         {currentPage === "list" && (
           <InquiryListPage
@@ -98,7 +121,9 @@ function InquiryPage({ user, onLogout }: InquiryPageProps) {
             onBack={handleBack}
             onUpdateStatus={handleUpdateStatus}
             onDelete={handleDelete}
-            onEdit={handleEditInquiry}
+            onEdit={() => {
+              setCurrentPage("edit");
+            }}
           />
         )}
         {currentPage === "create" && (
@@ -119,33 +144,3 @@ function InquiryPage({ user, onLogout }: InquiryPageProps) {
     </div>
   );
 }
-
-function App() {
-  const { user, isLoggedIn, isLoading, login, logout, register } = useAuth();
-
-  type AuthPage = "login" | "register";
-
-  const [authPage, setAuthPage] = useState<AuthPage>("login");
-
-  if (isLoading) return <p>読み込み中...</p>;
-  if (!isLoggedIn) {
-    if (authPage === "login") {
-      return (
-        <LoginForm
-          onLogin={login}
-          onSwitchToRegister={() => setAuthPage("register")}
-        />
-      );
-    }
-
-    return (
-      <RegisterForm
-        onRegister={register}
-        onSwitchToLogin={() => setAuthPage("login")}
-      />
-    );
-  }
-  return <InquiryPage user={user!} onLogout={logout} />;
-}
-
-export default App;

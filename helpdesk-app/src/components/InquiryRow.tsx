@@ -1,5 +1,10 @@
 import type { Inquiry } from '../types/inquiry'
 import { StatusBadge } from './StatusBadge'
+import {
+  Button,
+  TableCell,
+  TableRow,
+} from "@mui/material";
 
 type InquiryRowProps = {
   inquiry: Inquiry
@@ -7,18 +12,30 @@ type InquiryRowProps = {
 }
 
 // 一覧の 1 行。タイトルクリックで詳細へ遷移する
-export function InquiryRow({ inquiry, onSelect }: InquiryRowProps) {
+export function InquiryRow({
+  inquiry,
+  onSelect,
+}: InquiryRowProps) {
   return (
-    <tr>
-      <td>{inquiry.id}</td>
-      <td>
-        <button onClick={() => onSelect(inquiry.id)}>{inquiry.title}</button>
-      </td>
-      <td>
+    <TableRow hover>
+      <TableCell>{inquiry.id}</TableCell>
+
+      <TableCell>
+        <Button
+          variant="text"
+          onClick={() => onSelect(inquiry.id)}
+        >
+          {inquiry.title}
+        </Button>
+      </TableCell>
+
+      <TableCell>
         <StatusBadge status={inquiry.status} />
-      </td>
-      <td>{inquiry.requester}</td>
-      <td>{inquiry.created_at}</td>
-    </tr>
-  )
+      </TableCell>
+
+      <TableCell>{inquiry.requester}</TableCell>
+
+      <TableCell>{inquiry.created_at}</TableCell>
+    </TableRow>
+  );
 }

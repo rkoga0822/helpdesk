@@ -1,3 +1,8 @@
+import {
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
+
 const filters = [
   { value: 'all', label: 'すべて' },
   { value: 'pending', label: '未対応' },
@@ -12,19 +17,29 @@ type StatusFilterProps = {
 }
 
 // ステータス絞り込みボタン
-export function StatusFilter({ current, onChange, counts }: StatusFilterProps) {
+export function StatusFilter({
+  current,
+  onChange,
+  counts,
+}: StatusFilterProps) {
   return (
-    <div>
+    <ToggleButtonGroup
+      exclusive
+      value={current}
+      onChange={(_, value) => {
+        if (value !== null) onChange(value);
+      }}
+    >
       {filters.map((f) => (
-        <button
+        <ToggleButton
           key={f.value}
-          onClick={() => onChange(f.value)}
-          style={{ fontWeight: current === f.value ? 'bold' : 'normal' }}
+          value={f.value}
         >
           {f.label}
-          {counts[f.value] !== undefined && ` (${counts[f.value]})`}
-        </button>
+          {counts[f.value] !== undefined &&
+            ` (${counts[f.value]})`}
+        </ToggleButton>
       ))}
-    </div>
-  )
+    </ToggleButtonGroup>
+  );
 }
