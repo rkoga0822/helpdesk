@@ -101,7 +101,7 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
           />
         )}
         {currentPage === "create" && (
-          <InquiryCreatePage onCreated={createInquiry} onBack={handleBack} />
+          <InquiryCreatePage onCreated={handleCreated} onBack={handleBack} />
         )}
 
         {currentPage === "edit" && selectedInquiry && (
