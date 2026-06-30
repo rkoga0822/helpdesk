@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import type { Inquiry, InquiryCreateInput } from "../types/inquiry";
+import type { InquiryCreateInput } from "../types/inquiry";
 import {
   Box,
   Button,
@@ -18,7 +18,7 @@ type LaravelValidationError = {
 };
 
 type InquiryCreatePageProps = {
-  onCreated: (data: InquiryCreateInput) => void;
+  onCreated: () => void;
   onBack: () => void;
 };
 
@@ -33,29 +33,25 @@ export function InquiryCreatePage({
     setError,
     formState: { errors, isSubmitting },
   } = useForm<InquiryCreateInput>();
+  const { mutateAsync: createInquiry, isPending } = useCreateInquiry();
 
-  const onSubmit = (data: InquiryCreateInput) => {
-    createInquiry(data, {
-      onSuccess: () => {
-        onCreated(data);
-      },
+  const onSubmit = async (data: InquiryCreateInput) => {
+    try {
+      await createInquiry(data);
+      onCreated();
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.status === 422) {
+        const body = e.response.data as LaravelValidationError;
 
-      onError: (e) => {
-        if (axios.isAxiosError(e) && e.response?.status === 422) {
-          const body = e.response.data as LaravelValidationError;
-
-          Object.entries(body.errors).forEach(([field, messages]) => {
-            setError(field as keyof InquiryCreateInput, {
-              type: "server",
-              message: messages[0],
-            });
+        Object.entries(body.errors).forEach(([field, messages]) => {
+          setError(field as keyof InquiryCreateInput, {
+            type: "server",
+            message: messages[0],
           });
-        }
-      },
-    });
+        });
+      }
+    }
   };
-
-  const { mutate: createInquiry } = useCreateInquiry();
 
   return (
     <Box
@@ -140,9 +136,9 @@ export function InquiryCreatePage({
               type="submit"
               variant="contained"
               size="large"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
             >
-              {isSubmitting ? "送信中..." : "登録する"}
+              {isSubmitting || isPending ? "送信中..." : "登録する"}
             </Button>
           </Stack>
         </Box>

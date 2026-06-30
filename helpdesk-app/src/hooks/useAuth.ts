@@ -1,66 +1,67 @@
-import { useState, useEffect } from "react";
-import { api } from "../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "../api/auth";
-import type { User, LoginInput, RegisterInput } from "../types/auth";
+import { api } from "../lib/api";
+import type { AuthResponse, LoginInput, RegisterInput, User } from "../types/auth";
 
 const TOKEN_KEY = "auth_token";
+const authQueryKey = ["auth", "me"] as const;
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const hasToken = localStorage.getItem(TOKEN_KEY) !== null;
 
-  // 起動時に localStorage のトークンを確認してユーザーを復元する
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    // axios のデフォルトヘッダーにトークンをセット
+  const saveSession = ({ user, token }: AuthResponse) => {
+    localStorage.setItem(TOKEN_KEY, token);
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    queryClient.setQueryData(authQueryKey, user);
+    return user;
+  };
 
-    authApi
-      .me()
-      .then(setUser)
-      .catch(() => {
-        // トークンが無効な場合はクリアする
-        localStorage.removeItem(TOKEN_KEY);
-        delete api.defaults.headers.common["Authorization"];
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const clearSession = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    delete api.defaults.headers.common["Authorization"];
+    queryClient.setQueryData(authQueryKey, null);
+    queryClient.removeQueries({ queryKey: ["inquiries"] });
+  };
+
+  const meQuery = useQuery<User | null>({
+    queryKey: authQueryKey,
+    queryFn: authApi.me,
+    enabled: hasToken,
+    retry: false,
+    initialData: hasToken ? undefined : null,
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: saveSession,
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onSuccess: saveSession,
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: authApi.logout,
+    onSettled: clearSession,
+  });
+
+  const user = meQuery.data ?? null;
+  const isLoggedIn = user !== null;
+  const isLoading = hasToken && meQuery.isPending;
 
   const login = async (input: LoginInput) => {
-    const { user, token } = await authApi.login(input);
-
-    // トークンを保存して axios に設定する
-    localStorage.setItem(TOKEN_KEY, token);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-    setUser(user);
+    const { user } = await loginMutation.mutateAsync(input);
     return user;
   };
-
-  const logout = async () => {
-    try {
-      await authApi.logout();
-    } finally {
-      localStorage.removeItem(TOKEN_KEY);
-      delete api.defaults.headers.common["Authorization"];
-      setUser(null);
-    }
-  };
-
   const register = async (input: RegisterInput) => {
-    const { user, token } = await authApi.register(input);
-    localStorage.setItem(TOKEN_KEY, token);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setUser(user);
+    const { user } = await registerMutation.mutateAsync(input);
     return user;
   };
+  const logout = async () => {
+    await logoutMutation.mutateAsync();
+  };
 
-  const isLoggedIn = user !== null;
-
-  return { user, isLoggedIn, isLoading, login, logout,register };
+  return { user, isLoggedIn, isLoading, login, logout, register };
 }

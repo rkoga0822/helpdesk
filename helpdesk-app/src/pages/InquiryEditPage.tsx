@@ -8,11 +8,11 @@ import {
 } from "@mui/material";
 import Stack from "@mui/material/Stack";
 
-import { inquiryApi } from "../api/inquiries";
 import type {
   Inquiry,
   InquiryStatus,
 } from "../types/inquiry";
+import { useUpdateInquiry } from "../hooks/useCreateInquiry";
 
 type InquiryEditPageProps = {
   inquiry: Inquiry;
@@ -28,12 +28,16 @@ export const InquiryEditPage = ({
   const [title, setTitle] = useState(inquiry.title);
   const [content, setContent] = useState(inquiry.content);
   const [status, setStatus] = useState(inquiry.status);
+  const { mutateAsync: updateInquiry, isPending } = useUpdateInquiry();
 
   const handleSubmit = async () => {
-    const updated = await inquiryApi.update(inquiry.id, {
-      title,
-      content,
-      status,
+    const updated = await updateInquiry({
+      id: inquiry.id,
+      input: {
+        title,
+        content,
+        status,
+      },
     });
 
     onUpdated(updated);
@@ -103,8 +107,8 @@ export const InquiryEditPage = ({
             戻る
           </Button>
 
-          <Button variant="contained" onClick={handleSubmit}>
-            保存
+          <Button variant="contained" onClick={handleSubmit} disabled={isPending}>
+            {isPending ? "保存中..." : "保存"}
           </Button>
         </Stack>
       </Stack>
