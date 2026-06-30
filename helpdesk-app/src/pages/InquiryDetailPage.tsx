@@ -49,6 +49,22 @@ export function InquiryDetailPage({
 
           <StatusBadge status={inquiry.status} />
 
+          <FormControl fullWidth>
+            <InputLabel id="inquiry-status-label">ステータス</InputLabel>
+            <Select
+              labelId="inquiry-status-label"
+              label="ステータス"
+              value={inquiry.status}
+              onChange={(event) =>
+                onUpdateStatus(inquiry.id, event.target.value as InquiryStatus)
+              }
+            >
+              <MenuItem value="pending">未対応</MenuItem>
+              <MenuItem value="in_progress">対応中</MenuItem>
+              <MenuItem value="completed">完了</MenuItem>
+            </Select>
+          </FormControl>
+
           <Typography color="text.secondary">
             投稿者：{inquiry.requester}
           </Typography>

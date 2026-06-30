@@ -2,15 +2,17 @@ import { useState } from "react";
 import axios from "axios";
 import type { User } from "../types/auth";
 import { useInquiries } from "../hooks/useInquiries";
-import type { Inquiry, InquiryStatus } from "../types/inquiry";
-import { inquiryApi } from "../api/inquiries";
+import type { InquiryStatus } from "../types/inquiry";
 import { InquiryCreatePage } from "./InquiryCreatePage";
 import { InquiryDetailPage } from "./InquiryDetailPage";
 import { InquiryListPage } from "./InquiryListPage";
 import { InquiryEditPage } from "./InquiryEditPage";
 import { InquiryHeader } from "../components/InquiryHeader";
 import type { Page } from "../types/page";
-import { useCreateInquiry } from "../hooks/useCreateInquiry";
+import {
+  useDeleteInquiry,
+  useUpdateInquiryStatus,
+} from "../hooks/useCreateInquiry";
 type InquiryPageProps = {
   user: User;
   onLogout: () => void;
@@ -23,19 +25,10 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
     setFilter,
     isLoading,
     error,
-    updateInquiry,
-    removeInquiry,
   } = useInquiries();
 
-  const { mutate: createInquiry } = useCreateInquiry({
-    onSuccess: () => {
-      setCurrentPage("list");
-    },
-  });
-
-  const handleCreated = () => {
-    setCurrentPage("list");
-  };
+  const updateStatusMutation = useUpdateInquiryStatus();
+  const deleteInquiryMutation = useDeleteInquiry();
 
   const [currentPage, setCurrentPage] = useState<Page>("list");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -50,15 +43,13 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
   };
 
   const handleUpdateStatus = async (id: number, status: InquiryStatus) => {
-    const updated = await inquiryApi.updateStatus(id, status);
-    updateInquiry(updated);
+    await updateStatusMutation.mutateAsync({ id, status });
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("この問い合わせを削除しますか？")) return;
     try {
-      await inquiryApi.delete(id);
-      removeInquiry(id);
+      await deleteInquiryMutation.mutateAsync(id);
       handleBack();
     } catch (e) {
       if (axios.isAxiosError(e) && e.response?.status === 403) {
@@ -101,20 +92,18 @@ export const InquiryPage = ({ user, onLogout }: InquiryPageProps) => {
           />
         )}
         {currentPage === "create" && (
-          <InquiryCreatePage onCreated={handleCreated} onBack={handleBack} />
+          <InquiryCreatePage onCreated={() => setCurrentPage("list")} onBack={handleBack} />
         )}
 
         {currentPage === "edit" && selectedInquiry && (
           <InquiryEditPage
             inquiry={selectedInquiry}
             onBack={() => setCurrentPage("detail")}
-            onUpdated={(updated) => {
-              updateInquiry(updated);
-              setCurrentPage("detail");
-            }}
+            onUpdated={() => setCurrentPage("detail")}
           />
         )}
       </main>
     </div>
   );
 };
+

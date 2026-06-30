@@ -7,11 +7,16 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
 
 type RegisterFormProps = {
   onRegister: (input: RegisterInput) => Promise<unknown>;
   onSwitchToLogin: () => void;
 };
+
+type LaravelValidationError = {
+  errors:Record<string,string[]>
+}
 
 export function RegisterForm({
   onRegister,
@@ -20,13 +25,27 @@ export function RegisterForm({
   const {
     register,
     handleSubmit,
+    setError,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>();
   const password = watch("password", "");
 
   const onSubmit = async (data: RegisterInput) => {
-    await onRegister(data);
+    try{
+      await onRegister(data)
+    }catch(e){
+      if(axios.isAxiosError(e) && e.response?.status === 422){
+        const body = e.response.data as LaravelValidationError
+
+        Object.entries(body.errors).forEach(([field,messages])=>{
+          setError(field as keyof RegisterInput,{
+            type:"server",
+            message:messages[0]
+          })
+        })
+      }
+    }
   };
 
   return (
